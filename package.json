@@ -1,0 +1,23 @@
+{
+  "name": "test_playwright",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "playwright": "playwright test",
+    "playwright:ui": "playwright test --ui",
+    "playwright:report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "dotenv": "^16.3.1",
+    "otpauth": "^9.3.1"
+  },
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
+}
