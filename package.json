@@ -14,8 +14,7 @@
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
-    "dotenv": "^16.3.1",
-    "otpauth": "^9.3.1"
+    "dotenv": "^16.3.1"
   },
   "dependencies": {
     "playwright-core": "^1.49.0"
