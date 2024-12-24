@@ -51,9 +51,8 @@ test('kintaro_check', async () => {
   await page.locator('#modal-WC210-select-btn').click();
   await page.locator('#modal-WC210 thead').getByRole('checkbox').check();
   await page.getByRole('button', { name: 'OK' }).click();
-  const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'ダウンロード' }).click();
-  const download = await downloadPromise;
+  const download = await page.waitForEvent('download');
   await download.saveAs(path.join('./settings', download.suggestedFilename()));
 
   // 勤怠入寮状況の一覧をDOMから取得
