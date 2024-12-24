@@ -1,7 +1,7 @@
 import { test, chromium } from '@playwright/test';
 import * as path from 'path';
 import * as fs from "fs";
-import { parseCsvToJson } from '../src/csvParve';
+import { parseCsvToJson, isDeviation, categorizeByName, filterByDate } from '../src/parseCsv';
 import { postToSlack } from '../src/postToSlack';
 import type { ChannelsData, MemberData, MentionsData, DeviationData } from "../src/types";
 
@@ -111,55 +111,6 @@ test('kintaro_check', async () => {
   }
   return;
 });
-
-// 実働かい離データが存在するか判定
-const isDeviation = (data: any) => {
-  return data.filter((value: any) => {
-    // 稼働ありで乖離あり
-    const isWorkdayDeviation =
-      value["状況"] !== "承認済" &&
-      Number(value["実働かい離"]) > 120 &&
-      value["かい離理由"] === "-" &&
-      value["備考"] === "-";
-    // 休日に稼働あり
-    const isHolidayDeviation =
-      !(value["状況"] === "承認済" || value["状況"] === "登録済")
-      && value["休暇区分"] !== ""
-      && value["休暇区分"] !== "半日有休"
-      && value["休暇区分"] !== "半日STOC"
-      && value["かい離理由"] === "-"
-      && value["備考"] === "-"
-      && (value["客観開始"] !== "-" || value["客観終了"] !== "-");
-    return isWorkdayDeviation || isHolidayDeviation;
-  });
-}
-
-// 氏名ごとに分類
-const categorizeByName = (unapprovedData: any) => {
-  // 氏名をキーとしたオブジェクトに変換
-  return unapprovedData.reduce((result: any, item: any) => {
-    const { 氏名: name, ...rest } = item;
-    if (!result[name]) {
-      result[name] = [];
-    }
-    result[name].push(rest);
-    return result;
-  }, {});
-}
-
-// 日付だけを'dd日'の形式で抽出
-const filterByDate = (data: any) => {
-  return Object.keys(data).reduce(
-    (result: DeviationData, name: string) => {
-      const days = data[name].map((row: any) => {
-        return Number(row["日付"].split("/")[2]) + "日";
-      });
-      result[name] = days;
-      return result;
-    },
-    {},
-  );
-}
 
 const checkData = async (checkDate, contentHandle) => {
   const memberData: MemberData[] = [];
