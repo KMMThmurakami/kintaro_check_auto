@@ -1,7 +1,8 @@
-import { test, chromium } from '@playwright/test';
+import { test, chromium, Locator } from '@playwright/test';
 import * as path from 'path';
 import * as fs from "fs";
 import { parseCsvToJson, isDeviation, categorizeByName, filterByDate } from '../src/parseCsv';
+import { formatSlackStr } from '../src/formatSlackStr';
 import { postToSlack } from '../src/postToSlack';
 import type { ChannelsData, MemberData, MentionsData, DeviationData } from "../src/types";
 
@@ -67,16 +68,17 @@ test('kintaro_check', async () => {
   }
 
   // 承認状況一覧解析
-  // クラス名が "kinmudatalist" の最初の要素を取得
-  const contentHandle = await page.$('.kinmudatalist');
+  // クラス名が "kinmudatalist" の中の最初のtableタグを取得
+  // ※2つ目のtableタグは列固定用のDOM
+  const contentHandle = page.locator('.kinmudatalist > table').first();
 
   // チェックする日付
   // const checkDate = current.getDate() - 1;
   const checkDate = 31; // デバッグ用
 
-  // 稼働状況を解析
-  const checkResult = await checkData(checkDate, contentHandle);
-  const checkResultString = formatData(checkResult);
+  // 稼働状況をDOMから解析
+  const checkResult = await checkAttendance(checkDate, contentHandle);
+  const checkResultString = formatSlackStr(checkResult);
 
   // =====================
   // csv解析
@@ -112,30 +114,21 @@ test('kintaro_check', async () => {
   return;
 });
 
-const checkData = async (checkDate, contentHandle) => {
+// 稼働状況をDOMから解析
+const checkAttendance = async (checkDate: number, contentHandle: Locator) => {
   const memberData: MemberData[] = [];
   let memberCnt = 0;
 
   if (contentHandle) {
-    // contentHandle内の 'td[data-colidx]:not([data-colidx="0"], [data-colidx="1"])' を取得
-    const cells = await contentHandle.$$(
-      'td[data-colidx]:not([data-colidx="0"], [data-colidx="1"])'
-    );
+    const cellsLocator = contentHandle.locator('td[data-colidx]:not([data-colidx="0"], [data-colidx="1"])');
+    const cellCount = await cellsLocator.count();
 
     let notInputList: string[] = [];
 
-    for (const cellHandle of cells) {
-      // visibility: hidden のチェック
-      const isVisible = await cellHandle.evaluate((node) => {
-        const style = window.getComputedStyle(node);
-        return style.visibility !== "hidden";
-      });
-
-      // 非表示要素はスキップ
-      if (!isVisible) continue;
-
+    for (let i = 0; i < cellCount; i++) {
+      const cellLocator = cellsLocator.nth(i);
       // data-colidx の取得
-      const colIdx = await cellHandle.getAttribute("data-colidx");
+      const colIdx = await cellLocator.getAttribute("data-colidx");
       const colCnt = Number(colIdx) - 2;
 
       // 今日以降の日付チェックはスキップする
@@ -147,21 +140,21 @@ const checkData = async (checkDate, contentHandle) => {
       }
 
       // テキスト内容の取得
-      const text = await cellHandle.textContent();
+      const text = await cellLocator.textContent();
 
       // 氏名列の処理
       if (colIdx === "2") {
-        console.log('[checkData] =====================================');
-        console.log('[checkData] 氏名:', text.trim());
+        console.log('[checkAttendance] =====================================');
+        console.log('[checkAttendance] 氏名:', text?.trim());
 
-        memberData[memberCnt].name = text.trim();
+        memberData[memberCnt].name = text?.trim() || '';
         notInputList = [];
         continue;
       }
 
       // 日付列の処理
-      const classes = await cellHandle.evaluate((node) =>
-        Array.from(node.classList)
+      const classes = await cellLocator.evaluate((node) =>
+        Array.from((node as Element).classList)
       );
       const notInputWorkDay = classes.filter(
         () => !classes.includes("offday") && classes.includes("jsk-0")
@@ -173,30 +166,13 @@ const checkData = async (checkDate, contentHandle) => {
 
       // 最終日の集計が終わったところで出力
       if (colCnt === checkDate) {
-        console.log(`[checkData] ${notInputList}`);
+        console.log(`[checkAttendance] ${notInputList}`);
         memberData[memberCnt].date = notInputList;
         memberCnt++;
       }
     }
   }
 
-  console.log('[checkData] =====================================');
+  console.log('[checkAttendance] =====================================');
   return memberData;
-};
-
-// domから解析した情報をslack投稿用文字列にフォーマット
-const formatData = (checkResult: MemberData[]): string => {
-  let resultStr = "";
-  const values = Object.values(checkResult);
-
-  for (let i = 0; i < values.length; i++) {
-    if (values[i].date.length === 0) {
-      continue;
-    }
-    resultStr += `${values[i].name} さん\n`;
-    resultStr += "> 【勤怠未入力】" + values[i].date + "\n";
-    resultStr += "-\n";
-  }
-
-  return resultStr;
 };
