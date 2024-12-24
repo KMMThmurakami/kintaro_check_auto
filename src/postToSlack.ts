@@ -5,12 +5,12 @@ import type {
   SlackTextPayload,
   PostItem,
 } from "./types";
+import { current } from './currentDate';
 
 export const postToSlack = async (
   postChannel: ChannelsData,
   settingsMember: MentionsData[],
   workData: DeviationData,
-  currentYM: string,
   checkResultString: string
 ) => {
   try {
@@ -18,7 +18,6 @@ export const postToSlack = async (
       postChannel,
       settingsMember,
       workData,
-      currentYM,
       checkResultString
     ); // 非同期処理
     if (result.ok) {
@@ -36,7 +35,6 @@ const request = async (
   data: ChannelsData,
   mentionSettings: MentionsData[],
   DeviationData: DeviationData,
-  currentYM: string,
   checkResultString: string
 ) => {
   const token: string | undefined = process.env.SLACK_BOT_TOKEN;
@@ -52,7 +50,6 @@ const request = async (
     data,
     mentionSettings,
     DeviationData,
-    currentYM,
     checkResultString
   );
   return await fetchSlackApi(token, postData);
@@ -62,13 +59,11 @@ const getPostData = async (
   data: ChannelsData,
   mentionSettings: MentionsData[],
   DeviationData: DeviationData,
-  currentYM: string,
   planeText: string
 ): Promise<SlackTextPayload> => {
   let postText = "勤怠未入力のメンバーはいません！\n"; // 初期文字列
 
-  // storageのデータ取得
-  const ym = currentYM;
+  const ym = current.getFullYear() + "年" + (current.getMonth() + 1) + "月";;
   const postPlaneText = planeText;
 
   // 選択中グループ対象者を抽出

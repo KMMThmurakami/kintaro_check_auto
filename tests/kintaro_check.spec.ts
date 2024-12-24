@@ -4,6 +4,7 @@ import * as fs from "fs";
 import { parseCsvToJson, isDeviation, categorizeByName, filterByDate } from '../src/parseCsv';
 import { formatSlackStr } from '../src/formatSlackStr';
 import { postToSlack } from '../src/postToSlack';
+import { current } from '../src/currentDate';
 import type { ChannelsData, MemberData, MentionsData, DeviationData } from "../src/types";
 
 const KINTARO_PAGE_URL="https://kintarou.r-reco.jp/Lysithea/JSP_Files/authentication/WC010_SSO.jsp";
@@ -41,7 +42,6 @@ test('kintaro_check', async () => {
   // 今月分のデータを選択
   const inputLocator = page.locator('input[name="YearMonth"]').nth(1);
   const inputValue = await inputLocator.getAttribute('value');
-  const current = new Date();
   const currentYM = current.getFullYear() + "/" + (current.getMonth() + 1);
   if (inputValue !== currentYM) {
     await page.locator('#pickernext').click();
@@ -73,8 +73,8 @@ test('kintaro_check', async () => {
   const contentHandle = page.locator('.kinmudatalist > table').first();
 
   // チェックする日付
-  // const checkDate = current.getDate() - 1;
-  const checkDate = 31; // デバッグ用
+  const checkDate = current.getDate() - 1;
+  // const checkDate = 31; // デバッグ用
 
   // 稼働状況をDOMから解析
   const checkResult = await checkAttendance(checkDate, contentHandle);
@@ -109,12 +109,12 @@ test('kintaro_check', async () => {
   // 投稿チャンネル数分ループ
   if (!settingsChannel) return;
   for (const channels of settingsChannel) {
-    await postToSlack(channels as ChannelsData, settingsMember as MentionsData[], dateDeviation as DeviationData, currentYM, checkResultString); // 各投稿が完了するまで待つ
+    await postToSlack(channels as ChannelsData, settingsMember as MentionsData[], dateDeviation as DeviationData, checkResultString); // 各投稿が完了するまで待つ
   }
   return;
 });
 
-// 稼働状況をDOMから解析
+// 稼働状況をDOMから解析（playwrightメソッドを使用しているのでここに置いている）
 const checkAttendance = async (checkDate: number, contentHandle: Locator) => {
   const memberData: MemberData[] = [];
   let memberCnt = 0;
