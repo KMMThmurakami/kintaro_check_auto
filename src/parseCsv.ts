@@ -8,20 +8,8 @@ export const parseCsvToJson = (text: string, kind: string) => {
   const headers = headerRow.map((header) => header.trim());
 
   // ヘッダーチェック
-  let validHeader: string[] = [];
-  switch (kind) {
-    case "channel":
-      validHeader = CHANNEL_DATA_HEADER;
-      break;
-    case "member":
-      validHeader = MEMBER_DATA_HEADER;
-      break;
-    case "work":
-      validHeader = DEVIATION_DATA_HEADER;
-      break;
-    default:
-      break;
-  }
+  const validHeader: string[] = checkCsvKind(kind);
+
   const isValidFormat = validHeader.every((header) => headers.includes(header));
   if (!isValidFormat) {
     console.log(`${kind} : 不正な形式のファイルです`);
@@ -49,6 +37,24 @@ export const parseCsvToJson = (text: string, kind: string) => {
   }
   return importData;
 };
+
+const checkCsvKind = (kind: string) => {
+  let validHeader: string[] = [];
+  switch (kind) {
+    case "channel":
+      validHeader = CHANNEL_DATA_HEADER;
+      break;
+    case "member":
+      validHeader = MEMBER_DATA_HEADER;
+      break;
+    case "work":
+      validHeader = DEVIATION_DATA_HEADER;
+      break;
+    default:
+      break;
+  }
+  return validHeader;
+}
 
 // 実働かい離データが存在するか判定
 export const isDeviation = (data: any) => {
