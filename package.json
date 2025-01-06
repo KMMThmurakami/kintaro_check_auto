@@ -1,5 +1,5 @@
 {
-  "name": "test_playwright",
+  "name": "kintaro_check_auto",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
