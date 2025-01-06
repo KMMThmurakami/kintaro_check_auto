@@ -85,7 +85,7 @@ test('kintaro_check', async () => {
   const _csvDataMember = fs.readFileSync('settings/member_settings.csv').toString();
   const settingsMember = parseCsvToJson(_csvDataMember, "member");
 
-  // 勤太郎日次データ取得(UTF-8に変換する)
+  // 勤太郎日次データ取得(Shift-JIS -> UTF-8に変換する)
   const _csvDataWork = fs.readFileSync('settings/dailyAttendance.csv');
   const decoder = new TextDecoder('shift-jis');
   const _dataWorkUtf8Str = decoder.decode(_csvDataWork);
@@ -103,7 +103,12 @@ test('kintaro_check', async () => {
   // 投稿チャンネル数分ループ
   if (!settingsChannel) return;
   for (const channels of settingsChannel) {
-    await postToSlack(channels as ChannelsData, settingsMember as MentionsData[], dateDeviation as DeviationData, checkResultString); // 各投稿が完了するまで待つ
+    await postToSlack(
+      channels as ChannelsData,
+      settingsMember as MentionsData[],
+      dateDeviation as DeviationData,
+      checkResultString
+    );
   }
   return;
 });

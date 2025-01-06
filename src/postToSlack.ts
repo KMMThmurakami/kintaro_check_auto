@@ -21,24 +21,24 @@ export const postToSlack = async (
       checkResultString
     ); // 非同期処理
     if (result.ok) {
-      console.error(`投稿しました! ${postChannel.group}`);
+      console.log(`[postToSlack] 投稿しました! ${postChannel.group}`);
     } else {
-      console.error(`投稿に失敗しました ${result.error} ${postChannel.group}`);
+      console.error(`[postToSlack] 投稿に失敗しました ${result.error} ${postChannel.group}`);
     }
   } catch (error: any) {
-    console.error("想定外のエラー:", error);
+    console.error("[postToSlack] 想定外のエラー:", error);
   }
 };
 
 // slack投稿
 const request = async (
-  data: ChannelsData,
+  postChannel: ChannelsData,
   mentionSettings: MentionsData[],
   DeviationData: DeviationData,
   checkResultString: string
 ) => {
   const token: string | undefined = process.env.SLACK_BOT_TOKEN;
-  console.log("channelId is :" + data.channelId);
+  console.log("[request] channelId is :" + postChannel.channelId);
 
   if (!token) {
     throw new Error(
@@ -47,7 +47,7 @@ const request = async (
   }
 
   const postData = await getPostData(
-    data,
+    postChannel,
     mentionSettings,
     DeviationData,
     checkResultString
@@ -56,7 +56,7 @@ const request = async (
 };
 
 const getPostData = async (
-  data: ChannelsData,
+  postChannel: ChannelsData,
   mentionSettings: MentionsData[],
   DeviationData: DeviationData,
   planeText: string
@@ -66,9 +66,9 @@ const getPostData = async (
   const ym = current.getFullYear() + "年" + (current.getMonth() + 1) + "月";;
   const postPlaneText = planeText;
 
-  // 選択中グループ対象者を抽出
+  // グループ対象者を抽出
   const postGroupArray = mentionSettings.filter((member) => {
-    return member.group === data.group;
+    return member.group === postChannel.group;
   });
 
   if (postPlaneText !== null && postGroupArray.length > 0) {
@@ -121,7 +121,7 @@ const getPostData = async (
   }
 
   // メッセージを置換
-  const payload = getPayload(data.channelId);
+  const payload = getPayload(postChannel.channelId);
   payload.blocks[0].text.text = payload.blocks[0].text.text.replace("YM", ym);
   payload.blocks[1] = {
     type: "section",
@@ -132,32 +132,6 @@ const getPostData = async (
   };
 
   return payload;
-};
-
-// slackAPIに要求
-const fetchSlackApi = async (token: string, payload: SlackTextPayload) => {
-  try {
-    const response = await fetch("https://slack.com/api/chat.postMessage", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (data.ok) {
-      console.log("success");
-    } else {
-      console.log("miss");
-    }
-    return data;
-  } catch (e) {
-    console.error(e);
-    return e;
-  }
 };
 
 // payload取得
@@ -179,4 +153,30 @@ const getPayload = (channelId: string): SlackTextPayload => {
 
   payload.blocks.push(templateMessage);
   return payload;
+};
+
+// slackAPIに要求
+const fetchSlackApi = async (token: string, payload: SlackTextPayload) => {
+  try {
+    const response = await fetch("https://slack.com/api/chat.postMessage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (data.ok) {
+      console.log("[fetchSlackApi] success");
+    } else {
+      console.log("[fetchSlackApi] miss");
+    }
+    return data;
+  } catch (e) {
+    console.error(e);
+    return e;
+  }
 };
