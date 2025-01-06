@@ -70,6 +70,7 @@ test('kintaro_check', async () => {
   // クラス名が "kinmudatalist" の中の最初のtableタグを取得
   // ※2つ目のtableタグは列固定用のDOM
   const contentHandle = page.locator('.kinmudatalist > table').first();
+  await page.waitForTimeout(100);
   const checkDate = current.getDate() - 1;
   const checkResult = await checkAttendance(contentHandle, checkDate);
   const checkResultString = formatSlackStr(checkResult);
@@ -82,7 +83,7 @@ test('kintaro_check', async () => {
   const settingsChannel = parseCsvToJson(_csvDataChannels, "channel");
 
   // メンバー設定取得
-  const _csvDataMember = fs.readFileSync('settings/member_settings.csv').toString();
+  const _csvDataMember = fs.readFileSync('settings/mention_settings.csv').toString();
   const settingsMember = parseCsvToJson(_csvDataMember, "member");
 
   // 勤太郎日次データ取得(Shift-JIS -> UTF-8に変換する)
