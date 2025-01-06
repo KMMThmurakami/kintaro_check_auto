@@ -32,16 +32,16 @@ else
   output=$(printf "${USER}\n${PASS}" | $VPN_COMMAND -s connect $TARGET_SERVER)
   nlerror=$(echo "$output" | grep "error" | wc -l)
 
-  # 接続時にエラーがあれば既存プロセスをkillして終了
+  # 接続エラー時：G7の場合ここに入る
   if [ $nlerror -gt 0 ]; then
     echo "An error occurred during the VPN connection process. The VPN process is currently being killed. Please try again later." >&2
-    sudo pkill vpn
-    sudo pkill cisco
-    exit 1
+    # sudo pkill vpn
+    # sudo pkill cisco
+    # exit 1
   fi
 
   echo "$output"
 fi
 
 # 勤太郎チェックを起動
-npm run playwright --prefix "$APP_PATH"
+npm run playwright --prefix "$APP_PATH" >> "$APP_PATH"/log
