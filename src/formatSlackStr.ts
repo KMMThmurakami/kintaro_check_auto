@@ -1,7 +1,7 @@
-import type { MemberData } from "./types";
+import type { CheckResult } from "./types";
 
 // domから解析した情報をslack投稿用文字列にフォーマット
-export const formatSlackStr = (checkResult: MemberData[]): string => {
+export const formatSlackStr = (checkResult: CheckResult[]): string => {
   let resultStr = "";
   const values = Object.values(checkResult);
 

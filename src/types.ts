@@ -13,7 +13,7 @@ export type SlackTextPayload = {
   blocks: PostItem[];
 };
 
-export type MemberData = {
+export type CheckResult = {
   name: string;
   date: string[];
 };

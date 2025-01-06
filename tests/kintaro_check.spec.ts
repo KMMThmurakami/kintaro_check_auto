@@ -5,7 +5,7 @@ import { parseCsvToJson, isDeviation, categorizeByName, filterByDate } from '../
 import { formatSlackStr } from '../src/formatSlackStr';
 import { postToSlack } from '../src/postToSlack';
 import { current } from '../src/currentDate';
-import type { ChannelsData, MemberData, MentionsData, DeviationData } from "../src/types";
+import type { CheckResult, ChannelsData, MentionsData, DeviationData } from "../src/types";
 
 const KINTARO_PAGE_URL="https://kintarou.r-reco.jp/Lysithea/JSP_Files/authentication/WC010_SSO.jsp";
 
@@ -115,7 +115,7 @@ test('kintaro_check', async () => {
 
 // 稼働状況をDOMから解析（playwrightメソッドを使用しているのでここに置いている）
 const checkAttendance = async (contentHandle: Locator, checkDate: number) => {
-  const memberData: MemberData[] = [];
+  const memberData: CheckResult[] = [];
   let notInputList: string[] = [];
   let memberCnt = 0;
 
