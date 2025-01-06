@@ -10,6 +10,8 @@ import type { CheckResult, ChannelsData, MentionsData, DeviationData } from "../
 const KINTARO_PAGE_URL="https://kintarou.r-reco.jp/Lysithea/JSP_Files/authentication/WC010_SSO.jsp";
 
 test('kintaro_check', async () => {
+  console.log('[kintaro_check] start', current.toLocaleString('ja-JP', {timeZone: 'Asia/Tokyo'}));
+
   // Chromiumブラウザをカスタム設定で起動
   const context = await chromium.launchPersistentContext('');
   const page = await context.newPage();
