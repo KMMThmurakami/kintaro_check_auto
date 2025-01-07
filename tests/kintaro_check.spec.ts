@@ -19,7 +19,7 @@ test('kintaro_check', async () => {
   // =====================
   // 前処理
   // =====================
-  // Cokkie埋め込み
+  // Cookie埋め込み
   context.addCookies([
     {
       name: "ESTSAUTHPERSISTENT",
@@ -28,12 +28,14 @@ test('kintaro_check', async () => {
       path: "/"
     },
   ]);
+  console.log('[kintaro_check] Cookie埋め込み完了');
 
   // =====================
   // 勤太郎
   // =====================
   // 勤太郎アクセス
   await page.goto(KINTARO_PAGE_URL || "");
+  console.log('[kintaro_check] 勤太郎アクセス完了');
 
   // 勤太郎操作
   // メンバーの勤怠情報csvを取得
@@ -56,6 +58,7 @@ test('kintaro_check', async () => {
   await page.getByRole('button', { name: 'ダウンロード' }).click();
   const download = await page.waitForEvent('download');
   await download.saveAs(path.join('./settings', download.suggestedFilename()));
+  console.log('[kintaro_check] csvダウンロード完了');
 
   // 勤怠入力状況の一覧をDOMから取得
   // ※未入力判定はDOM上を調べたほうが確実
@@ -76,6 +79,7 @@ test('kintaro_check', async () => {
   const checkDate = current.getDate() - 1;
   const checkResult = await checkAttendance(contentHandle, checkDate);
   const checkResultString = formatSlackStr(checkResult);
+  console.log('[kintaro_check] 承認状況一覧解析完了');
 
   // =====================
   // csv解析
@@ -98,6 +102,7 @@ test('kintaro_check', async () => {
   const _workDataDeviation = isDeviation(_workData);
   const _deviationByName = categorizeByName(_workDataDeviation);
   const dateDeviation = filterByDate(_deviationByName);
+  console.log('[kintaro_check] slack送信準備完了');
 
   // =====================
   // slack送信
