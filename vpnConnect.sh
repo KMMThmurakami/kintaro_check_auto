@@ -44,4 +44,4 @@ else
 fi
 
 # 勤太郎チェックを起動
-npm run playwright --prefix "$APP_PATH" >> "$APP_PATH"/log
+npm run playwright --prefix "$APP_PATH" | tee "$APP_PATH"/log
