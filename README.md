@@ -33,7 +33,7 @@ Microsoft365アカウント ログインセッション
   - https://account.microsoft.com/account?lang=ja-jp にアクセスする
 - 右上の「アカウントにサインインする」をクリック
 - 「サインイン」画面になったらDevツールを開く
-- 「Application」タブ=>「Cookies」=>「https://login.microsoftonline.com」を選択
+- 「Application」タブ=>「Cookies」=>「 https://login.microsoftonline.com 」を選択
 - `ESTSAUTHPERSISTENT`のValueを確認し設定
   - 参考:https://learn.microsoft.com/ja-jp/entra/identity/authentication/concept-authentication-web-browser-cookies
 
